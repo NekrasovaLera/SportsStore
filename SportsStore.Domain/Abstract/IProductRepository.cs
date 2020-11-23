@@ -10,6 +10,7 @@ namespace SportsStore.Domain.Abstract
     public interface IProductRepository
     {
         IQueryable<Product> Products { get; }
+        IQueryable<Category> Categories { get; }
         void SaveProduct(Product product);
         Product DeleteProduct(int productID);
     }

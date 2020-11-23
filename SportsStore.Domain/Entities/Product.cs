@@ -32,6 +32,7 @@ namespace SportsStore.Domain.Entities
 
         [Required(ErrorMessage = "Please specify a category")]
         public Category Category { get; set; }
+        public int CatID { get; set; }
 
         public byte[] ImageData { get; set; }
 
