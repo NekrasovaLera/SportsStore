@@ -12,6 +12,8 @@ namespace SportsStore.Domain.Abstract
         IQueryable<Product> Products { get; }
         IQueryable<Category> Categories { get; }
         void SaveProduct(Product product);
+        void SaveCategory(Category category);
         Product DeleteProduct(int productID);
+        Category DeleteCategory(int CatID);
     }
 }

@@ -54,5 +54,35 @@ namespace SportsStore.Domain.Concrete
 
             return dbEntry;
         }
+
+        public void SaveCategory(Category category)
+        {
+            if (category.CatID == 0)
+            {
+                context.Categories.Add(category);
+            }
+            else
+            {
+                Category dbEntry = context.Categories.Find(category.CatID);
+                if (dbEntry != null)
+                {
+                    dbEntry.CatName = category.CatName;
+                }
+            }
+
+            context.SaveChanges();
+        }
+
+        public Category DeleteCategory(int CatID)
+        {
+            Category dbEntry = context.Categories.Find(CatID);
+            if (dbEntry != null)
+            {
+                context.Categories.Remove(dbEntry);
+                context.SaveChanges();
+            }
+
+            return dbEntry;
+        }
     }
 }

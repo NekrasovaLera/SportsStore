@@ -24,6 +24,11 @@ namespace SportsStore.WebUI.Controllers
             return View(repository.Products);
         }
 
+        public PartialViewResult Categories()
+        {
+            return PartialView(repository.Categories);
+        }
+
         public ViewResult Edit(int productId)
         {
             Product product = repository.Products
@@ -64,6 +69,45 @@ namespace SportsStore.WebUI.Controllers
             if (deletedProduct != null)
             {
                 TempData["message"] = string.Format("{0} was deleted", deletedProduct.Name);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public ViewResult EditCategory(int categoryId)
+        {
+            Category category = repository.Categories
+                .FirstOrDefault(p => p.CatID == categoryId);
+            return View(category);
+        }
+
+        [HttpPost]
+        public ActionResult EditCategory(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                repository.SaveCategory(category);
+                TempData["message"] = string.Format("{0} has been saved", category.CatName);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View(category);
+            }
+        }
+
+        public ViewResult CreateCategory()
+        {
+            return View("EditCategory", new Category());
+        }
+
+        [HttpPost]
+        public ActionResult DeleteCategory(int categoryId)
+        {
+            Category deletedCategory = repository.DeleteCategory(categoryId);
+            if (deletedCategory != null)
+            {
+                TempData["message"] = string.Format("{0} was deleted", deletedCategory.CatName);
             }
 
             return RedirectToAction("Index");
