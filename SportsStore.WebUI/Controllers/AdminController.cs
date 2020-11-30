@@ -74,10 +74,10 @@ namespace SportsStore.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
-        public ViewResult EditCategory(int categoryId)
+        public ViewResult EditCategory(int CatId)
         {
             Category category = repository.Categories
-                .FirstOrDefault(p => p.CatID == categoryId);
+                .FirstOrDefault(p => p.CatID == CatId);
             return View(category);
         }
 
@@ -102,9 +102,9 @@ namespace SportsStore.WebUI.Controllers
         }
 
         [HttpPost]
-        public ActionResult DeleteCategory(int categoryId)
+        public ActionResult DeleteCategory(int CatId)
         {
-            Category deletedCategory = repository.DeleteCategory(categoryId);
+            Category deletedCategory = repository.DeleteCategory(CatId);
             if (deletedCategory != null)
             {
                 TempData["message"] = string.Format("{0} was deleted", deletedCategory.CatName);

@@ -140,3 +140,7 @@ C:\Users\007KorinaVS\source\repos\SportsStore\SportsStore.UnitTests\bin\Debug\Sy
 C:\Users\007KorinaVS\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.csproj.CopyComplete
 C:\Users\007KorinaVS\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.dll
 C:\Users\007KorinaVS\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.pdb
+C:\Users\Lera\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.csprojAssemblyReference.cache
+C:\Users\Lera\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.csproj.CoreCompileInputs.cache
+C:\Users\Lera\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.dll
+C:\Users\Lera\source\repos\SportsStore\SportsStore.UnitTests\obj\Debug\SportsStore.UnitTests.pdb

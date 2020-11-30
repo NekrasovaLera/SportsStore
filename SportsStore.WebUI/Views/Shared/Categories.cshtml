@@ -15,7 +15,7 @@
             <td>
                 @using (Html.BeginForm("DeleteCategory", "Admin"))
                 {
-                    @Html.Hidden("ProductID", item.CatID)
+                    @Html.Hidden("CatID", item.CatID)
                     <input type="submit" value="Delete" />
                 }
             </td>

@@ -86,10 +86,6 @@
       <Project>{02ac2f33-cd15-41ca-84e5-7be56df31f7a}</Project>
       <Name>SportsStore.Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SportsStore.WebUI\SportsStore.WebUI.csproj">
-      <Project>{3da045d0-b820-432e-813b-0119d7fffb79}</Project>
-      <Name>SportsStore.WebUI</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
