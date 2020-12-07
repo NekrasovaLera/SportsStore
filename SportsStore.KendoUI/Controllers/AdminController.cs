@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using SportsStore.KendoUI.Models;
 using Kendo.Mvc.Extensions;
 using Kendo.Mvc.UI;
 
@@ -16,105 +17,155 @@ namespace SportsStore.KendoUI.Controllers
     {
         private IProductRepository repository;
 
-        public AdminController(IProductRepository repo)
+        public AdminController(IProductRepository repository)
         {
-            repository = repo;
+            this.repository = repository;
         }
 
         [Authorize]
         public ViewResult Index()
         {
-            return View(repository.Categories);
+            var categories = repository.Categories.Select(e => new
+            {
+                CatID = e.CatID,
+                CatName = e.CatName
+            })
+                .OrderBy(e => e.CatName);
+            ViewData["categories"] = categories;
+            ViewData["defaultCategory"] = categories.First();
+            return View();
         }
 
         public ActionResult ReadCategories([DataSourceRequest] DataSourceRequest request)
         {
-            var result = repository.Categories.Select(x => x.CatName);
-            return Json(result.ToList().ToDataSourceResult(request));
+            var result = repository.Categories.ToList();
+            return Json(result.ToDataSourceResult(request));
         }
 
-        public ViewResult Edit(int productId)
+        public IList<ProductViewModel> GetProducts()
         {
-            Product product = repository.Products
-                .FirstOrDefault(p => p.ProductID == productId);
-            return View(product);
-        }
-
-        [HttpPost]
-        public ActionResult Edit(Product product, HttpPostedFileBase image)
-        {
-            if (ModelState.IsValid)
+            var result = repository.Products.Select(product => new ProductViewModel
             {
-                if (image != null)
+                ProductID = product.ProductID,
+                Name = product.Name,
+                Description = product.Description,
+                Category = product.Category,
+                Price = product.Price,
+                ImageData = product.ImageData,
+                ImageMimeType = product.ImageMimeType
+            }).ToList();
+            return result;
+        }
+
+        public FileContentResult GetImage(int productId)
+        {
+            Product prod = repository.Products.FirstOrDefault(p => p.ProductID == productId);
+            if (prod != null)
+            {
+                if (prod.ImageData != null)
                 {
-                    product.ImageMimeType = image.ContentType;
-                    product.ImageData = new byte[image.ContentLength];
-                    image.InputStream.Read(product.ImageData, 0, image.ContentLength);
+                    return File(prod.ImageData, prod.ImageMimeType);
                 }
-                repository.SaveProduct(product);
-                TempData["message"] = string.Format("{0} has been saved", product.Name);
-                return RedirectToAction("Index");
+                else
+                {
+                    return null;
+                }
             }
             else
             {
-                return View(product);
+                return null;
             }
         }
 
-        public ViewResult Create()
+        public ActionResult ReadProducts([DataSourceRequest] DataSourceRequest request)
         {
-            return View("Edit", new Product());
+            var result = GetProducts();
+            return Json(result.ToDataSourceResult(request));
         }
 
-        [HttpPost]
-        public ActionResult Delete(int productId)
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult EditCategory([DataSourceRequest] DataSourceRequest request, Category category)
         {
-            Product deletedProduct = repository.DeleteProduct(productId);
-            if (deletedProduct != null)
+            if (category != null && ModelState.IsValid)
             {
-                TempData["message"] = string.Format("{0} was deleted", deletedProduct.Name);
+                var target = repository.Categories.FirstOrDefault(e => e.CatID == category.CatID);
+                target.CatID = category.CatID;
+                target.CatName = category.CatName;
+                repository.SaveCategory(target);
             }
 
-            return RedirectToAction("Index");
+            return Json(new[] { category }.ToDataSourceResult(request, ModelState));
         }
 
-        public ViewResult EditCategory(int CatId)
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult CreateCategory([DataSourceRequest] DataSourceRequest request, Category category)
         {
-            Category category = repository.Categories
-                .FirstOrDefault(p => p.CatID == CatId);
-            return View(category);
-        }
-
-        [HttpPost]
-        public ActionResult EditCategory(Category category)
-        {
-            if (ModelState.IsValid)
+            if (category != null && ModelState.IsValid)
             {
-                repository.SaveCategory(category);
-                TempData["message"] = string.Format("{0} has been saved", category.CatName);
-                return RedirectToAction("Index");
+                var entity = new Category {
+                    CatID = category.CatID,
+                    CatName = category.CatName
+                };
+                repository.SaveCategory(entity);
+                category.CatID = entity.CatID;
+            }
+
+            return Json(new[] { category }.ToDataSourceResult(request, ModelState));
+        }
+
+        public Category GetCategory(string catName)
+        {
+            var result = repository.Categories.FirstOrDefault(e => e.CatName == catName);
+            if (result != null)
+            {
+                return result;
             }
             else
             {
-                return View(category);
+                return null;
             }
         }
 
-        public ViewResult CreateCategory()
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult CreateProduct([DataSourceRequest] DataSourceRequest request, ProductViewModel product)
         {
-            return View("EditCategory", new Category());
-        }
-
-        [HttpPost]
-        public ActionResult DeleteCategory(int CatId)
-        {
-            Category deletedCategory = repository.DeleteCategory(CatId);
-            if (deletedCategory != null)
+            if (product != null && ModelState.IsValid)
             {
-                TempData["message"] = string.Format("{0} was deleted", deletedCategory.CatName);
+                var entity = new Product
+                {
+                    ProductID = product.ProductID,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Category = GetCategory(product.Category.CatName),
+                    CatID = GetCategory(product.Category.CatName).CatID
+                };
+                repository.SaveProduct(entity);
+                product.ProductID = entity.ProductID;
             }
 
-            return RedirectToAction("Index");
+            return Json(new[] { product }.ToDataSourceResult(request, ModelState));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult DeleteCategory([DataSourceRequest] DataSourceRequest request, Category category)
+        {
+            if (category != null)
+            {
+                repository.DeleteCategory(category.CatID);
+            }
+
+            return Json(new[] { category }.ToDataSourceResult(request, ModelState));
+        }
+
+        public ActionResult SaveImage(HttpPostedFileBase image)
+        {
+            return View();
+        }
+
+        public ActionResult RemoveImage(HttpPostedFileBase image)
+        {
+            return View();
         }
     }
 }

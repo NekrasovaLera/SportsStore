@@ -1,16 +1,15 @@
 ﻿@{
     ViewBag.Title = "Admin: All Products snd Categories";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-@using Kendo.Mvc.UI
+<h1>Categories</h1>
 @(Html.Kendo().Grid<SportsStore.Domain.Entities.Category>()
-        .Name("grid")
+        .Name("categories")
         .Columns(columns =>
         {
-            columns.Bound(c => c.CatID);
-            columns.Bound(c => c.CatName);
-            columns.Command(command => { command.Edit(); command.Destroy(); }).Width(250);
+            columns.Bound(c => c.CatID).Title("ID");
+            columns.Bound(c => c.CatName).Title("Name");
+            columns.Command(command => { command.Edit(); command.Destroy(); }).Width(270);
         })
         .ToolBar(toolbar => toolbar.Create())
         .Editable(editable => editable.Mode(GridEditMode.PopUp))
@@ -29,6 +28,44 @@
             .Destroy(update => update.Action("DeleteCategory", "Admin"))
         )
     )
+
+<h1>Products</h1>
+@(Html.Kendo().Grid<SportsStore.KendoUI.Models.ProductViewModel>()
+        .Name("products")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ProductID).Title("ID");
+            columns.Bound(c => c.Name).Title("Name");
+            columns.Bound(c => c.Description).Title("Description");
+            columns.Bound(c => c.Price).Title("Price").Format("{0:c}");
+            columns.Bound(c => c.Category).Title("Category").ClientTemplate("#=Category.CatName#").Sortable(false).Width(180);
+            columns.Bound(c => c.ProductID).Title("Image").ClientTemplate(@"<img width='75' height='75' src='" + @Url.Action("GetImage", "Admin", new { productId = "#:ProductID#" }) + "'/>");
+            columns.Command(command => { command.Edit(); command.Destroy(); }).Width(270);
+        })
+        .ToolBar(toolbar => toolbar.Create())
+        .Editable(editable => editable.Mode(GridEditMode.PopUp))
+        .Pageable()
+        .Sortable()
+        .Scrollable()
+        .HtmlAttributes(new { style = "height:550px;" })
+        .DataSource(dataSourcee => dataSourcee
+            .Ajax()
+            .PageSize(20)
+            .Events(events => events.Error("error_handler"))
+            .Model(model =>
+            {
+                model.Id(p => p.ProductID);
+                model.Field(p => p.ProductID).Editable(false);
+                model.Field(p => p.Category).DefaultValue(
+                ViewData["defaultCategory"] as SportsStore.Domain.Entities.Category);
+            })
+            .Create(update => update.Action("CreateProduct", "Admin"))
+            .Read(read => read.Action("ReadProducts", "Admin"))
+            .Update(update => update.Action("EditProduct", "Admin"))
+            .Destroy(update => update.Action("DeleteProduct", "Admin"))
+        )
+    )
+
 <script type="text/javascript">
     function error_handler(e) {
         if (e.errors) {
