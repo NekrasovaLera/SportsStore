@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Welcome page!";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using SportsStore.KendoUI.Models
+@using Kendo.Mvc.UI.Fluent
+
+@(Html.Kendo().Grid<SportsStore.KendoUI.Models.ProductViewModel>()
+        .Name("products")
+        .DataSource(dataSourcee => dataSourcee
+            .Ajax()
+            .PageSize(5)
+            .Read(read => read.Action("ReadProducts", "Product"))
+        )
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Name).Title("Name");
+            columns.Bound(c => c.ProductID).Title("Image").ClientTemplate(@"<img width='75' height='75' src='" + @Url.Action("GetImage", "Product", new { productId = "#:ProductID#" }) + "'/>");
+            columns.Bound(c => c.Description).Title("Description");
+            columns.Bound(c => c.Category.CatName).Title("Category").Width(200);
+            columns.Bound(c => c.Price).Title("Price").Format("{0:c}");
+        })
+        .ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+               <div class="toolbar">
+                    <label class="category-label" for="category">Show products by category:</label>
+                        @(Html.Kendo().TreeView()
+                            .Name("categories")
+                            .BindTo((IEnumerable<CategoryItem>)ViewBag.inline, (NavigationBindingFactory<TreeViewItem> mappings) =>
+                            {
+                                mappings.For<CategoryItem>(binding => binding.ItemDataBound((it, category) =>
+                                {
+                                    it.Text = category.Category;
+                                })
+                                    .Children(category => category.SubCategories));
+
+                                mappings.For<string>(binding => binding.ItemDataBound((it, str) =>
+                                {
+                                    it.Text = str;
+                                }));
+                            })
+                            .Events(events => events
+                                .Select("onSelect")
+                            )
+                            .DataTextField("CatName")
+                        )
+               </div>
+            </text>);
+        })
+        .HtmlAttributes(new { style = "height:550px;" })
+        .Filterable()
+        .Pageable()
+    )
+
+@Scripts.Render("~/Scripts/myscripts/myscript.js")

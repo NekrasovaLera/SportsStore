@@ -25,14 +25,8 @@ namespace SportsStore.KendoUI.Controllers
         [Authorize]
         public ViewResult Index()
         {
-            var categories = repository.Categories.Select(e => new
-            {
-                CatID = e.CatID,
-                CatName = e.CatName
-            })
-                .OrderBy(e => e.CatName);
-            ViewData["categories"] = categories;
-            ViewData["defaultCategory"] = categories.First();
+            PopulateCategories();
+            PopulateImages();
             return View();
         }
 
@@ -49,6 +43,7 @@ namespace SportsStore.KendoUI.Controllers
                 ProductID = product.ProductID,
                 Name = product.Name,
                 Description = product.Description,
+                CatID = product.CatID,
                 Category = product.Category,
                 Price = product.Price,
                 ImageData = product.ImageData,
@@ -98,6 +93,22 @@ namespace SportsStore.KendoUI.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult EditProduct([DataSourceRequest] DataSourceRequest request, ProductViewModel product)
+        {
+            if (product != null && ModelState.IsValid)
+            {
+                var target = repository.Products.FirstOrDefault(e => e.ProductID == product.ProductID);
+                target.Name = product.Name;
+                target.Description = product.Description;
+                target.Price = product.Price;
+                target.CatID = product.CatID;
+                repository.SaveProduct(target);
+            }
+
+            return Json(new[] { product }.ToDataSourceResult(request, ModelState));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult CreateCategory([DataSourceRequest] DataSourceRequest request, Category category)
         {
             if (category != null && ModelState.IsValid)
@@ -131,15 +142,21 @@ namespace SportsStore.KendoUI.Controllers
         {
             if (product != null && ModelState.IsValid)
             {
-                var entity = new Product
+                var entity = new Product();
+                entity.ProductID = product.ProductID;
+                entity.Name = product.Name;
+                entity.Description = product.Description;
+                entity.Price = product.Price;
+                entity.CatID = product.CatID;
+                if (entity.CatID == 0)
                 {
-                    ProductID = product.ProductID,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Price = product.Price,
-                    Category = GetCategory(product.Category.CatName),
-                    CatID = GetCategory(product.Category.CatName).CatID
-                };
+                    entity.CatID = 1;
+                }
+
+                if (product.Category != null)
+                {
+                    entity.CatID = product.Category.CatID;
+                }
                 repository.SaveProduct(entity);
                 product.ProductID = entity.ProductID;
             }
@@ -156,6 +173,34 @@ namespace SportsStore.KendoUI.Controllers
             }
 
             return Json(new[] { category }.ToDataSourceResult(request, ModelState));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult DeleteProduct([DataSourceRequest] DataSourceRequest request, Product product)
+        {
+            if (product != null)
+            {
+                repository.DeleteProduct(product.ProductID);
+            }
+
+            return Json(new[] { product }.ToDataSourceResult(request, ModelState));
+        }
+
+        public void PopulateCategories()
+        {
+            var categories = repository.Categories.ToList().OrderBy(e => e.CatName);
+            ViewData["categories"] = categories;
+        }
+
+        public void PopulateImages()
+        {
+            var imgs = repository.Products.Select(i => new
+            {
+                ProductID = i.ProductID,
+                ImageData = i.ImageData,
+                ImageMimeType = i.ImageMimeType
+            }).ToList();
+            ViewData["imgs"] = imgs;
         }
 
         public ActionResult SaveImage(HttpPostedFileBase image)

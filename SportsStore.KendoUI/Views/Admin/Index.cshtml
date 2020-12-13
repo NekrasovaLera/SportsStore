@@ -36,14 +36,15 @@
         {
             columns.Bound(c => c.ProductID).Title("ID");
             columns.Bound(c => c.Name).Title("Name");
-            columns.Bound(c => c.Description).Title("Description");
-            columns.Bound(c => c.Price).Title("Price").Format("{0:c}");
-            columns.Bound(c => c.Category).Title("Category").ClientTemplate("#=Category.CatName#").Sortable(false).Width(180);
             columns.Bound(c => c.ProductID).Title("Image").ClientTemplate(@"<img width='75' height='75' src='" + @Url.Action("GetImage", "Admin", new { productId = "#:ProductID#" }) + "'/>");
+            columns.Bound(c => c.Description).Title("Description");
+            columns.ForeignKey(c => c.CatID, (System.Collections.IEnumerable)ViewData["categories"], "CatID", "CatName").Title("Category").Width(200);
+            columns.Bound(c => c.Price).Title("Price").Format("{0:c}");
             columns.Command(command => { command.Edit(); command.Destroy(); }).Width(270);
         })
         .ToolBar(toolbar => toolbar.Create())
         .Editable(editable => editable.Mode(GridEditMode.PopUp))
+        .Filterable()
         .Pageable()
         .Sortable()
         .Scrollable()
@@ -51,13 +52,14 @@
         .DataSource(dataSourcee => dataSourcee
             .Ajax()
             .PageSize(20)
+            .ServerOperation(false)
             .Events(events => events.Error("error_handler"))
             .Model(model =>
             {
                 model.Id(p => p.ProductID);
                 model.Field(p => p.ProductID).Editable(false);
-                model.Field(p => p.Category).DefaultValue(
-                ViewData["defaultCategory"] as SportsStore.Domain.Entities.Category);
+                model.Field(p => p.CatID).DefaultValue(1);
+                model.Field(p => p.ImageData).DefaultValue(null);
             })
             .Create(update => update.Action("CreateProduct", "Admin"))
             .Read(read => read.Action("ReadProducts", "Admin"))

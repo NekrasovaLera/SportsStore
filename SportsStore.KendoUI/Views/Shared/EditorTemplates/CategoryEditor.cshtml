@@ -1,7 +1,0 @@
-﻿@model SportsStore.Domain.Entities.Category
-
-@(Html.Kendo().DropDownListFor(m => m)
-    .DataValueField("CatID")
-    .DataTextField("CatName")
-    .BindTo((System.Collections.IEnumerable)ViewData["categories"])
-)

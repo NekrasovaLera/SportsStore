@@ -1,0 +1,23 @@
+﻿@using SportsStore.KendoUI.Models
+@using Kendo.Mvc.UI.Fluent
+
+@(
+    Html.Kendo().TreeView()
+        .Name("treeview")
+        .BindTo((IEnumerable<CategoryItem>)ViewBag.inline, (NavigationBindingFactory<TreeViewItem> mappings) =>
+        {
+            mappings.For<CategoryItem>(binding => binding.ItemDataBound((item, category) =>
+            {
+                item.Text = category.Category;
+            })
+                .Children(category => category.SubCategories));
+
+            mappings.For<string>(binding => binding.ItemDataBound((item, str) =>
+            {
+                item.Text = str;
+            }));
+        })
+        .Events(events => events
+            .Select("onSelect")
+        )
+)

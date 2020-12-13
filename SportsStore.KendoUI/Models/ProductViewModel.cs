@@ -14,9 +14,13 @@ namespace SportsStore.KendoUI.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
-        [UIHint("CategoryEditor")]
+        
         public Category Category { get; set; }
 
+        [UIHint("GridForeignKey")]
+        public int CatID { get; set; }
+
+        [UIHint("ImageModel")]
         public byte[] ImageData { get; set; }
         public string ImageMimeType { get; set; }
     }

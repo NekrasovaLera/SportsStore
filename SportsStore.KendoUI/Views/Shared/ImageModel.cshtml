@@ -1,9 +1,0 @@
-﻿@(Html.Kendo().Upload()
-    .Name("image")
-    .Async(a => a
-            .Save("SaveImage", "Admin")
-            .Remove("RemoveImage", "Admin")
-            .SaveField("image")
-    )
-    .Validation(validation => validation.AllowedExtensions(new string[] { ".jpg", ".png" }).MaxFileSize(3145728))
-)

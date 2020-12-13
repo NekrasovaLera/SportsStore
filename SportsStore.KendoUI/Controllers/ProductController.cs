@@ -1,44 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using SportsStore.Domain.Abstract;
 using SportsStore.Domain.Entities;
 using SportsStore.KendoUI.Models;
+using Kendo.Mvc.UI;
+using Kendo.Mvc.Extensions;
 
 namespace SportsStore.KendoUI.Controllers
 {
     public class ProductController : Controller
     {
-        public int PageSize = 4;
         private IProductRepository repository;
         public ProductController(IProductRepository productRepository)
         {
             this.repository = productRepository;
         }
 
-        public ViewResult List(string category, int page = 1)
+        public ViewResult List()
         {
-            ProductsListViewModel model = new ProductsListViewModel
-            {
-                Products = repository.Products
-                    .Where(p => category == null || p.Category.CatName == category)
-                    .OrderBy(p => p.ProductID)
-                    .Skip((page - 1) * PageSize)
-                    .Take(PageSize),
-                PagingInfo = new PagingInfo
-                {
-                    CurrentPage = page,
-                    ItemsPerPage = PageSize,
-                    TotalItems = category == null ?
-                        repository.Products.Count() :
-                        repository.Products.Where(e => e.Category.CatName == category).Count()
-                },
-                CurrentCategory = category
-            };
+            return View();
+        }
 
-            return View(model);
+        public IList<ProductViewModel> GetProducts()
+        {
+            var result = repository.Products.Select(product => new ProductViewModel
+            {
+                ProductID = product.ProductID,
+                Name = product.Name,
+                Description = product.Description,
+                CatID = product.CatID,
+                Category = product.Category,
+                Price = product.Price,
+                ImageData = product.ImageData,
+                ImageMimeType = product.ImageMimeType
+            }).ToList();
+            return result;
+        }
+
+        public ActionResult ReadProducts([DataSourceRequest] DataSourceRequest request)
+        {
+            var result = GetProducts();
+            return Json(result.ToDataSourceResult(request));
         }
 
         public FileContentResult GetImage(int productId)
@@ -46,7 +52,14 @@ namespace SportsStore.KendoUI.Controllers
             Product prod = repository.Products.FirstOrDefault(p => p.ProductID == productId);
             if (prod != null)
             {
-                return File(prod.ImageData, prod.ImageMimeType);
+                if (prod.ImageData != null)
+                {
+                    return File(prod.ImageData, prod.ImageMimeType);
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {

@@ -1,9 +1,11 @@
 ﻿using SportsStore.Domain.Abstract;
+using SportsStore.KendoUI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Kendo.Mvc.UI;
 
 namespace SportsStore.KendoUI.Controllers
 {
@@ -16,14 +18,25 @@ namespace SportsStore.KendoUI.Controllers
             repository = repo;
         }
 
-        public PartialViewResult Menu(int? category = null)
+        public PartialViewResult ShowCategories()
         {
-            ViewBag.SelectedCategory = category;
-            IEnumerable<string> categories = repository.Categories
-                .Select(x => x.CatName)
-                .Distinct()
-                .OrderBy(x => x);
-            return PartialView(categories);
+            ViewBag.inline = GetData();
+            return PartialView();
+        }
+
+        private IEnumerable<CategoryItem> GetData()
+        {
+            List<string> items = repository.Categories.Select(e => e.CatName).ToList();
+            List <CategoryItem> inline = new List<CategoryItem>
+            {
+                new CategoryItem
+                {
+                    Category = "All categories",
+                    SubCategories = items
+                }
+            };
+
+            return inline;
         }
     }
 }
